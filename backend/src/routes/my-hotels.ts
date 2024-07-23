@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import cloudinary from "cloudinary";
-import { HotelType } from "../shared/types";
+// import { HotelType } from "../shared/types";
 import Hotel from "../models/hotels";
+import { HotelType } from "../shared/types";
 import verifyToken from "../middlewares/authMiddleware";
 import { body } from "express-validator";
 
@@ -14,7 +15,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// api/my-hotels
+// api/add-hotel
 router.post(
   "/",
   verifyToken,
@@ -53,9 +54,21 @@ router.post(
       res.status(201).send(hotel);
     } catch (error) {
       console.log("Error while creating Hotel: ", error);
-      res.status(500).json({ message: "Something went wrong in creating hotel" });
+      res
+        .status(500)
+        .json({ message: "Something went wrong in creating hotel" });
     }
   }
 );
 
-export default router
+//api/my-hotels
+router.get("/", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const hotels = await Hotel.find({ userId: req.userId });
+    res.json(hotels);
+  } catch (error) {
+    res.status(500).json({ message: " Error while fetching hotels" });
+  }
+});
+
+export default router;
