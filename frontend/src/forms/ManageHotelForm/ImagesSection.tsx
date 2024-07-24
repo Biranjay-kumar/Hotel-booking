@@ -1,15 +1,43 @@
 import { useFormContext } from "react-hook-form";
 import { HotelFormData } from "./ManageHotelForm";
-
+import { MdOutlineDelete } from "react-icons/md";
 const ImagesSection = () => {
   const {
     register,
     formState: { errors },
+    watch,
+    setValue,
   } = useFormContext<HotelFormData>();
+  const existingImageUrls = watch("imageUrls");
+  const handleDelete = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    imageUrl: string
+  ) => {
+    event.preventDefault();
+    setValue(
+      "imageUrls",
+      existingImageUrls.filter((url) => url !== imageUrl)
+    );
+  };
   return (
     <div className="ml-4">
       <h2 className="text-2xl font-bold mb-3 text-green-400 ">Images</h2>
       <div className="border rounded p-4 flex flex-col gap-4 bg-blue-100">
+        {existingImageUrls && (
+          <div className="grid grid-cols-6 gap-4">
+            {existingImageUrls.map((url) => (
+              <div className="relative group">
+                <img src={url} className="min-h-full object-cover" />
+                <button
+                  onClick={(event) => handleDelete(event, url)}
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white"
+                >
+                  <MdOutlineDelete className="mr-2" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <input
           type="file"
           multiple
@@ -17,7 +45,8 @@ const ImagesSection = () => {
           className="w-full text-gray-700 font-normal"
           {...register("imageFiles", {
             validate: (imagesFiles) => {
-              const totalLength = imagesFiles.length;
+              const totalLength =
+                imagesFiles.length + existingImageUrls?.length || 0;
               if (totalLength === 0) {
                 return "at least One image should be added";
               }
