@@ -3,7 +3,7 @@ import hotel from "../../public/hotelb.jpg";
 import * as apiClient from "../api-clients";
 import { useMutation, useQueryClient } from "react-query";
 import { useAppContext } from "../contexts/AppContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export type SIgnInFormData = {
   email: string;
@@ -14,16 +14,18 @@ const SignIn = () => {
   const { showToast } = useAppContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const location = useLocation();
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm<SIgnInFormData>();
+
   const mutation = useMutation(apiClient.signIn, {
     onSuccess: async () => {
       showToast({ message: "Welcome Home!", type: "SUCCESS" });
       await queryClient.invalidateQueries("validateToken");
-      navigate("/");
+      navigate(location.state?.from?.pathname || "/");
     },
     onError: (error: Error) => {
       showToast({ message: error.message, type: "ERROR" });
